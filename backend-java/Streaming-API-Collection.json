@@ -1,169 +1,1433 @@
 {
-    "info": {
-        "name": "Secure Video Streaming API (Java)",
-        "description": "Postman Collection for the Spring Boot Backend endpoints",
-        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  "info": {
+    "_postman_id": "a42b9fcd-cab1-40a8-97ab-6a6cc7326d7f",
+    "name": "Secure Video Streaming API (Java)",
+    "description": "Postman Collection for the Spring Boot Backend endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "46295192"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "1. Login (Demo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.accessToken) {",
+                  "    pm.collectionVariables.set(\"token\", response.accessToken);",
+                  "    console.log(\"Token automatically saved to collection variables!\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     },
-    "variable": [
+    {
+      "name": "Video",
+      "item": [
         {
-            "key": "baseUrl",
-            "value": "http://localhost:8080",
-            "type": "string"
+          "name": "2. List Videos",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/video/list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "video",
+                "list"
+              ]
+            }
+          },
+          "response": []
         },
         {
-            "key": "token",
-            "value": "",
-            "type": "string"
-        }
-    ],
-    "item": [
-        {
-            "name": "Auth",
-            "item": [
+          "name": "3. Generate Presigned URL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Ambil JSON response\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "// Ambil URL dari response\r",
+                  "const presignedUrl = response.url;\r",
+                  "\r",
+                  "// Parse URL\r",
+                  "const urlObj = new URL(presignedUrl);\r",
+                  "\r",
+                  "// Ambil query params\r",
+                  "const token = urlObj.searchParams.get(\"token\");\r",
+                  "const exp = urlObj.searchParams.get(\"exp\");\r",
+                  "\r",
+                  "// Set ke collection variables\r",
+                  "pm.collectionVariables.set(\"video_token\", token);\r",
+                  "pm.collectionVariables.set(\"video_exp\", exp);\r",
+                  "\r",
+                  "console.log(\"Token:\", token);\r",
+                  "console.log(\"Exp:\", exp);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
                 {
-                    "name": "1. Login (Demo)",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "const response = pm.response.json();",
-                                    "if (response.accessToken) {",
-                                    "    pm.collectionVariables.set(\"token\", response.accessToken);",
-                                    "    console.log(\"Token automatically saved to collection variables!\");",
-                                    "}"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/auth/login",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "auth",
-                                "login"
-                            ]
-                        }
-                    },
-                    "response": []
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
                 }
-            ]
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/video/presign/sample-22.mp4",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "video",
+                "presign",
+                "sample-22.mp4"
+              ]
+            }
+          },
+          "response": []
         },
         {
-            "name": "Video",
-            "item": [
+          "name": "4. Stream Video (Test via GET)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "",
+                  "// Visualize HTTP response metadata for the video stream request",
+                  "const statusCode = pm.response.code;",
+                  "const responseTime = pm.response.responseTime;",
+                  "const responseSize = pm.response.responseSize;",
+                  "const contentType = pm.response.headers.get('Content-Type') || 'N/A';",
+                  "const contentRange = pm.response.headers.get('Content-Range') || 'N/A';",
+                  "const acceptRanges = pm.response.headers.get('Accept-Ranges') || 'N/A';",
+                  "const contentLength = pm.response.headers.get('Content-Length') || 'N/A';",
+                  "",
+                  "// Parse range info",
+                  "let rangeStart = 'N/A', rangeEnd = 'N/A', totalSize = 'N/A', receivedKB = 'N/A';",
+                  "if (contentRange && contentRange !== 'N/A') {",
+                  "    const match = contentRange.match(/bytes (\\d+)-(\\d+)\\/(\\d+)/);",
+                  "    if (match) {",
+                  "        rangeStart = parseInt(match[1]).toLocaleString();",
+                  "        rangeEnd = parseInt(match[2]).toLocaleString();",
+                  "        totalSize = (parseInt(match[3]) / 1024 / 1024).toFixed(2) + ' MB';",
+                  "        receivedKB = ((parseInt(match[2]) - parseInt(match[1])) / 1024).toFixed(2) + ' KB';",
+                  "    }",
+                  "}",
+                  "",
+                  "const statusColor = statusCode === 206 ? '#27ae60' : statusCode < 300 ? '#2ecc71' : statusCode < 400 ? '#f39c12' : '#e74c3c';",
+                  "const statusLabel = statusCode === 206 ? 'Partial Content ✓' : statusCode === 200 ? 'OK ✓' : 'Status ' + statusCode;",
+                  "",
+                  "const template = `",
+                  "<style>",
+                  "  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; margin: 0; padding: 20px; }",
+                  "  h2 { color: #a78bfa; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px; }",
+                  "  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }",
+                  "  .card { background: #1a1a2e; border-radius: 10px; padding: 16px; border-left: 4px solid #a78bfa; }",
+                  "  .card.green { border-left-color: #27ae60; }",
+                  "  .card.blue { border-left-color: #3498db; }",
+                  "  .card.orange { border-left-color: #f39c12; }",
+                  "  .card-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }",
+                  "  .card-value { font-size: 22px; font-weight: bold; color: #fff; }",
+                  "  .card-sub { font-size: 11px; color: #aaa; margin-top: 4px; }",
+                  "  .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }",
+                  "  .info-table { width: 100%; border-collapse: collapse; background: #1a1a2e; border-radius: 10px; overflow: hidden; }",
+                  "  .info-table th { background: #2d2d44; color: #a78bfa; padding: 10px 14px; text-align: left; font-size: 12px; text-transform: uppercase; }",
+                  "  .info-table td { padding: 10px 14px; border-bottom: 1px solid #2a2a3e; font-size: 13px; }",
+                  "  .info-table tr:last-child td { border-bottom: none; }",
+                  "  .bar-container { background: #2d2d44; border-radius: 6px; height: 18px; margin-top: 8px; overflow: hidden; }",
+                  "  .bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #a78bfa, #3498db); transition: width 0.5s; }",
+                  "  .section-title { color: #a78bfa; font-size: 13px; font-weight: bold; margin: 20px 0 10px; text-transform: uppercase; letter-spacing: 1px; }",
+                  "</style>",
+                  "",
+                  "<h2>🎬 Video Stream Response Dashboard</h2>",
+                  "",
+                  "<div class=\"grid\">",
+                  "  <div class=\"card green\">",
+                  "    <div class=\"card-label\">HTTP Status</div>",
+                  "    <div class=\"card-value\" style=\"color: {{statusColor}};\">{{statusCode}}</div>",
+                  "    <div class=\"card-sub\"><span class=\"status-badge\" style=\"background: {{statusColor}}22; color: {{statusColor}};\">{{statusLabel}}</span></div>",
+                  "  </div>",
+                  "  <div class=\"card blue\">",
+                  "    <div class=\"card-label\">Response Time</div>",
+                  "    <div class=\"card-value\">{{responseTime}}<span style=\"font-size:13px; color:#aaa;\"> ms</span></div>",
+                  "    <div class=\"card-sub\">Time to first byte</div>",
+                  "  </div>",
+                  "  <div class=\"card orange\">",
+                  "    <div class=\"card-label\">Data Received</div>",
+                  "    <div class=\"card-value\">{{receivedKB}}</div>",
+                  "    <div class=\"card-sub\">Partial content chunk</div>",
+                  "  </div>",
+                  "</div>",
+                  "",
+                  "<div class=\"section-title\">📦 Range Details</div>",
+                  "<table class=\"info-table\">",
+                  "  <tr><th>Property</th><th>Value</th></tr>",
+                  "  <tr><td>Content-Range</td><td>{{contentRange}}</td></tr>",
+                  "  <tr><td>Range Start</td><td>{{rangeStart}} bytes</td></tr>",
+                  "  <tr><td>Range End</td><td>{{rangeEnd}} bytes</td></tr>",
+                  "  <tr><td>Total File Size</td><td>{{totalSize}}</td></tr>",
+                  "  <tr><td>Accept-Ranges</td><td>{{acceptRanges}}</td></tr>",
+                  "  <tr><td>Content-Length</td><td>{{contentLength}} bytes</td></tr>",
+                  "  <tr><td>Content-Type</td><td>{{contentType}}</td></tr>",
+                  "</table>",
+                  "",
+                  "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script>",
+                  "<div class=\"section-title\" style=\"margin-top:24px;\">📊 Byte Range Chart</div>",
+                  "<canvas id=\"rangeChart\" height=\"60\"></canvas>",
+                  "<script>",
+                  "pm.getData(function(err, data) {",
+                  "    var ctx = document.getElementById('rangeChart');",
+                  "    new Chart(ctx, {",
+                  "        type: 'horizontalBar',",
+                  "        data: {",
+                  "            labels: ['File Bytes'],",
+                  "            datasets: [",
+                  "                {",
+                  "                    label: 'Before Range (skipped)',",
+                  "                    data: [data.rangeStartRaw],",
+                  "                    backgroundColor: '#2d2d44'",
+                  "                },",
+                  "                {",
+                  "                    label: 'Requested Range (received)',",
+                  "                    data: [data.rangeEndRaw - data.rangeStartRaw],",
+                  "                    backgroundColor: '#a78bfa'",
+                  "                },",
+                  "                {",
+                  "                    label: 'Remaining (not requested)',",
+                  "                    data: [data.totalSizeRaw - data.rangeEndRaw],",
+                  "                    backgroundColor: '#1a1a2e'",
+                  "                }",
+                  "            ]",
+                  "        },",
+                  "        options: {",
+                  "            scales: {",
+                  "                xAxes: [{ stacked: true, ticks: { fontColor: '#aaa' }, gridLines: { color: '#2d2d44' } }],",
+                  "                yAxes: [{ stacked: true, ticks: { fontColor: '#aaa' }, gridLines: { color: '#2d2d44' } }]",
+                  "            },",
+                  "            legend: { labels: { fontColor: '#ccc' } },",
+                  "            title: { display: false }",
+                  "        }",
+                  "    });",
+                  "});",
+                  "</script>",
+                  "`;",
+                  "",
+                  "function constructVisualizerPayload() {",
+                  "    let rangeStartRaw = 0, rangeEndRaw = 0, totalSizeRaw = 0;",
+                  "    const cr = pm.response.headers.get('Content-Range') || '';",
+                  "    const match = cr.match(/bytes (\\d+)-(\\d+)\\/(\\d+)/);",
+                  "    if (match) {",
+                  "        rangeStartRaw = parseInt(match[1]);",
+                  "        rangeEndRaw = parseInt(match[2]);",
+                  "        totalSizeRaw = parseInt(match[3]);",
+                  "    }",
+                  "    return {",
+                  "        statusCode: statusCode,",
+                  "        statusColor: statusColor,",
+                  "        statusLabel: statusLabel,",
+                  "        responseTime: responseTime,",
+                  "        receivedKB: receivedKB,",
+                  "        contentRange: contentRange,",
+                  "        rangeStart: rangeStart,",
+                  "        rangeEnd: rangeEnd,",
+                  "        totalSize: totalSize,",
+                  "        acceptRanges: acceptRanges,",
+                  "        contentLength: contentLength,",
+                  "        contentType: contentType,",
+                  "        rangeStartRaw: rangeStartRaw,",
+                  "        rangeEndRaw: rangeEndRaw,",
+                  "        totalSizeRaw: totalSizeRaw",
+                  "    };",
+                  "}",
+                  "",
+                  "pm.visualizer.set(template, constructVisualizerPayload());",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Range",
+                "value": "bytes=0-1000000",
+                "description": "Optional: Simulates a partial content request from a browser video player.",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/video/stream/sample-22.mp4?token={{video_token}}&exp={{video_exp}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "video",
+                "stream",
+                "sample-22.mp4"
+              ],
+              "query": [
                 {
-                    "name": "2. List Videos",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/video/list",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "video",
-                                "list"
-                            ]
-                        }
-                    },
-                    "response": []
+                  "key": "token",
+                  "value": "{{video_token}}",
+                  "description": "Get this from the Presigned URL response"
                 },
                 {
-                    "name": "3. Generate Presigned URL",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/video/presign/sample.mov",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "video",
-                                "presign",
-                                "sample.mov"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "4. Stream Video (Test via GET)",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Range",
-                                "value": "bytes=0-1000000",
-                                "description": "Optional: Simulates a partial content request from a browser video player.",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/video/stream/sample.mov?token=PASTE_TOKEN_HERE&exp=PASTE_EXP_HERE",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "video",
-                                "stream",
-                                "sample.mov"
-                            ],
-                            "query": [
-                                {
-                                    "key": "token",
-                                    "value": "PASTE_TOKEN_HERE",
-                                    "description": "Get this from the Presigned URL response"
-                                },
-                                {
-                                    "key": "exp",
-                                    "value": "PASTE_EXP_HERE",
-                                    "description": "Get this from the Presigned URL response"
-                                }
-                            ]
-                        },
-                        "description": "Note: You need to manually copy the `token` and `exp` from the 'Generate Presigned URL' response and paste them into the query parameters here to test it."
-                    },
-                    "response": []
+                  "key": "exp",
+                  "value": "{{video_exp}}",
+                  "description": "Get this from the Presigned URL response"
                 }
-            ]
+              ]
+            },
+            "description": "Note: You need to manually copy the `token` and `exp` from the 'Generate Presigned URL' response and paste them into the query parameters here to test it."
+          },
+          "response": []
         }
-    ]
+      ]
+    },
+    {
+      "name": "🎬 Video Stream Simulation",
+      "item": [
+        {
+          "name": "Chunk 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Video Stream Simulation - Chunk Progress Tracker",
+                  "const statusCode = pm.response.code;",
+                  "const contentRange = pm.response.headers.get('Content-Range') || 'N/A';",
+                  "const responseTime = pm.response.responseTime;",
+                  "",
+                  "// Parse range",
+                  "let rangeStart = 0, rangeEnd = 0, totalSize = 0;",
+                  "if (contentRange !== 'N/A') {",
+                  "    const match = contentRange.match(/bytes (\\d+)-(\\d+)\\/(\\d+)/);",
+                  "    if (match) {",
+                  "        rangeStart = parseInt(match[1]);",
+                  "        rangeEnd = parseInt(match[2]);",
+                  "        totalSize = parseInt(match[3]);",
+                  "    }",
+                  "}",
+                  "",
+                  "// Track cumulative chunks in collection variable",
+                  "let chunks = [];",
+                  "try {",
+                  "    chunks = JSON.parse(pm.collectionVariables.get('sim_chunks') || '[]');",
+                  "} catch(e) { chunks = []; }",
+                  "",
+                  "const chunkName = pm.info.requestName;",
+                  "const alreadyExists = chunks.find(function(c) { return c.name === chunkName; });",
+                  "if (!alreadyExists) {",
+                  "    chunks.push({",
+                  "        name: chunkName,",
+                  "        start: rangeStart,",
+                  "        end: rangeEnd,",
+                  "        size: rangeEnd - rangeStart,",
+                  "        status: statusCode,",
+                  "        time: responseTime",
+                  "    });",
+                  "    pm.collectionVariables.set('sim_chunks', JSON.stringify(chunks));",
+                  "}",
+                  "",
+                  "// Tests",
+                  "pm.test(\"Status is 206 Partial Content\", function() {",
+                  "    pm.response.to.have.status(206);",
+                  "});",
+                  "pm.test(\"Content-Range header present\", function() {",
+                  "    pm.expect(pm.response.headers.get('Content-Range')).to.not.be.undefined;",
+                  "});",
+                  "",
+                  "// Visualizer",
+                  "const totalSizeMB = totalSize > 0 ? (totalSize / 1024 / 1024).toFixed(2) : '?';",
+                  "const progressPct = totalSize > 0 ? Math.min(((rangeEnd + 1) / totalSize) * 100, 100).toFixed(1) : 0;",
+                  "",
+                  "const template = `",
+                  "<style>",
+                  "  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; margin: 0; padding: 20px; }",
+                  "  h2 { color: #a78bfa; font-size: 18px; margin-bottom: 6px; }",
+                  "  .subtitle { color: #888; font-size: 12px; margin-bottom: 20px; }",
+                  "  .progress-wrap { background: #1a1a2e; border-radius: 10px; padding: 20px; margin-bottom: 20px; }",
+                  "  .progress-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }",
+                  "  .progress-bar-bg { background: #2d2d44; border-radius: 8px; height: 24px; overflow: hidden; }",
+                  "  .progress-bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, #a78bfa, #3b82f6); display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: bold; color: #fff; }",
+                  "  .chunks-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }",
+                  "  .chunk-card { background: #1a1a2e; border-radius: 8px; padding: 12px; text-align: center; border: 2px solid #2d2d44; }",
+                  "  .chunk-card.done { border-color: #a78bfa; }",
+                  "  .chunk-card.pending { opacity: 0.4; }",
+                  "  .chunk-name { font-size: 11px; color: #aaa; margin-bottom: 4px; }",
+                  "  .chunk-status { font-size: 18px; }",
+                  "  .chunk-size { font-size: 10px; color: #888; margin-top: 4px; }",
+                  "  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }",
+                  "  .stat-card { background: #1a1a2e; border-radius: 8px; padding: 14px; border-left: 3px solid #a78bfa; }",
+                  "  .stat-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }",
+                  "  .stat-value { font-size: 20px; font-weight: bold; color: #fff; }",
+                  "  .stat-sub { font-size: 10px; color: #aaa; margin-top: 2px; }",
+                  "  canvas { margin-top: 10px; }",
+                  "</style>",
+                  "",
+                  "<h2>Video Stream Simulation</h2>",
+                  "<div class=\"subtitle\">Simulating progressive video chunk delivery</div>",
+                  "",
+                  "<div class=\"progress-wrap\">",
+                  "  <div class=\"progress-label\">",
+                  "    <span>Streaming Progress</span>",
+                  "    <span>{{progressPct}}% of {{totalSizeMB}} MB</span>",
+                  "  </div>",
+                  "  <div class=\"progress-bar-bg\">",
+                  "    <div class=\"progress-bar-fill\" style=\"width: {{progressPct}}%;\">{{progressPct}}%</div>",
+                  "  </div>",
+                  "</div>",
+                  "",
+                  "<div class=\"chunks-grid\" id=\"chunksGrid\"></div>",
+                  "",
+                  "<div class=\"stats-grid\">",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Current Chunk</div>",
+                  "    <div class=\"stat-value\">{{chunkName}}</div>",
+                  "    <div class=\"stat-sub\">HTTP {{statusCode}}</div>",
+                  "  </div>",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Response Time</div>",
+                  "    <div class=\"stat-value\">{{responseTime}} ms</div>",
+                  "    <div class=\"stat-sub\">Chunk delivery speed</div>",
+                  "  </div>",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Bytes Received</div>",
+                  "    <div class=\"stat-value\">{{chunkSizeKB}} KB</div>",
+                  "    <div class=\"stat-sub\">{{rangeStart}} - {{rangeEnd}}</div>",
+                  "  </div>",
+                  "</div>",
+                  "",
+                  "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script>",
+                  "<canvas id=\"timeChart\" height=\"80\"></canvas>",
+                  "",
+                  "<script>",
+                  "pm.getData(function(err, data) {",
+                  "    var allChunks = ['Chunk 1','Chunk 2','Chunk 3','Chunk 4','Chunk 5'];",
+                  "    var grid = document.getElementById('chunksGrid');",
+                  "    allChunks.forEach(function(name) {",
+                  "        var chunkData = data.chunks.find(function(c) { return c.name === name; });",
+                  "        var isDone = !!chunkData;",
+                  "        var card = document.createElement('div');",
+                  "        card.className = 'chunk-card ' + (isDone ? 'done' : 'pending');",
+                  "        card.innerHTML = '<div class=\"chunk-name\">' + name + '</div>' +",
+                  "            '<div class=\"chunk-status\">' + (isDone ? '✅' : '⏳') + '</div>' +",
+                  "            '<div class=\"chunk-size\">' + (isDone ? chunkData.time + ' ms' : '—') + '</div>';",
+                  "        grid.appendChild(card);",
+                  "    });",
+                  "",
+                  "    var ctx = document.getElementById('timeChart');",
+                  "    new Chart(ctx, {",
+                  "        type: 'bar',",
+                  "        data: {",
+                  "            labels: data.chunks.map(function(c) { return c.name; }),",
+                  "            datasets: [{",
+                  "                label: 'Response Time (ms)',",
+                  "                data: data.chunks.map(function(c) { return c.time; }),",
+                  "                backgroundColor: '#a78bfa',",
+                  "                borderRadius: 4",
+                  "            }]",
+                  "        },",
+                  "        options: {",
+                  "            legend: { labels: { fontColor: '#ccc' } },",
+                  "            title: { display: true, text: 'Chunk Response Times', fontColor: '#a78bfa' },",
+                  "            scales: {",
+                  "                xAxes: [{ ticks: { fontColor: '#aaa' }, gridLines: { color: '#2d2d44' } }],",
+                  "                yAxes: [{ ticks: { fontColor: '#aaa' }, gridLines: { color: '#2d2d44' } }]",
+                  "            }",
+                  "        }",
+                  "    });",
+                  "});",
+                  "</script>",
+                  "`;",
+                  "",
+                  "function constructVisualizerPayload() {",
+                  "    var chunks = [];",
+                  "    try { chunks = JSON.parse(pm.collectionVariables.get('sim_chunks') || '[]'); } catch(e) {}",
+                  "    return {",
+                  "        chunkName: pm.info.requestName,",
+                  "        statusCode: statusCode,",
+                  "        responseTime: responseTime,",
+                  "        chunkSizeKB: ((rangeEnd - rangeStart) / 1024).toFixed(2),",
+                  "        rangeStart: rangeStart.toLocaleString(),",
+                  "        rangeEnd: rangeEnd.toLocaleString(),",
+                  "        totalSizeMB: totalSizeMB,",
+                  "        progressPct: progressPct,",
+                  "        chunks: chunks",
+                  "    };",
+                  "}",
+                  "",
+                  "pm.visualizer.set(template, constructVisualizerPayload());"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Range",
+                "value": "bytes=0-1048575"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/video/stream/sample-22.mp4?token={{video_token}}&exp={{video_exp}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "video",
+                "stream",
+                "sample-22.mp4"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{video_token}}"
+                },
+                {
+                  "key": "exp",
+                  "value": "{{video_exp}}"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET \"{{baseUrl}}/video/stream/sample-22.mp4?token={{video_token}}&exp={{video_exp}}\" -H \"Range: bytes=0-1048575\""
+          },
+          "response": []
+        },
+        {
+          "name": "Chunk 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Video Stream Simulation - Chunk Progress Tracker",
+                  "const statusCode = pm.response.code;",
+                  "const contentRange = pm.response.headers.get('Content-Range') || 'N/A';",
+                  "const responseTime = pm.response.responseTime;",
+                  "",
+                  "// Parse range",
+                  "let rangeStart = 0, rangeEnd = 0, totalSize = 0;",
+                  "if (contentRange !== 'N/A') {",
+                  "    const match = contentRange.match(/bytes (\\d+)-(\\d+)\\/(\\d+)/);",
+                  "    if (match) {",
+                  "        rangeStart = parseInt(match[1]);",
+                  "        rangeEnd = parseInt(match[2]);",
+                  "        totalSize = parseInt(match[3]);",
+                  "    }",
+                  "}",
+                  "",
+                  "// Track cumulative chunks in collection variable",
+                  "let chunks = [];",
+                  "try {",
+                  "    chunks = JSON.parse(pm.collectionVariables.get('sim_chunks') || '[]');",
+                  "} catch(e) { chunks = []; }",
+                  "",
+                  "const chunkName = pm.info.requestName;",
+                  "const alreadyExists = chunks.find(function(c) { return c.name === chunkName; });",
+                  "if (!alreadyExists) {",
+                  "    chunks.push({",
+                  "        name: chunkName,",
+                  "        start: rangeStart,",
+                  "        end: rangeEnd,",
+                  "        size: rangeEnd - rangeStart,",
+                  "        status: statusCode,",
+                  "        time: responseTime",
+                  "    });",
+                  "    pm.collectionVariables.set('sim_chunks', JSON.stringify(chunks));",
+                  "}",
+                  "",
+                  "// Tests",
+                  "pm.test(\"Status is 206 Partial Content\", function() {",
+                  "    pm.response.to.have.status(206);",
+                  "});",
+                  "pm.test(\"Content-Range header present\", function() {",
+                  "    pm.expect(pm.response.headers.get('Content-Range')).to.not.be.undefined;",
+                  "});",
+                  "",
+                  "// Visualizer",
+                  "const totalSizeMB = totalSize > 0 ? (totalSize / 1024 / 1024).toFixed(2) : '?';",
+                  "const progressPct = totalSize > 0 ? Math.min(((rangeEnd + 1) / totalSize) * 100, 100).toFixed(1) : 0;",
+                  "",
+                  "const template = `",
+                  "<style>",
+                  "  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; margin: 0; padding: 20px; }",
+                  "  h2 { color: #a78bfa; font-size: 18px; margin-bottom: 6px; }",
+                  "  .subtitle { color: #888; font-size: 12px; margin-bottom: 20px; }",
+                  "  .progress-wrap { background: #1a1a2e; border-radius: 10px; padding: 20px; margin-bottom: 20px; }",
+                  "  .progress-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }",
+                  "  .progress-bar-bg { background: #2d2d44; border-radius: 8px; height: 24px; overflow: hidden; }",
+                  "  .progress-bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, #a78bfa, #3b82f6); display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: bold; color: #fff; }",
+                  "  .chunks-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }",
+                  "  .chunk-card { background: #1a1a2e; border-radius: 8px; padding: 12px; text-align: center; border: 2px solid #2d2d44; }",
+                  "  .chunk-card.done { border-color: #a78bfa; }",
+                  "  .chunk-card.pending { opacity: 0.4; }",
+                  "  .chunk-name { font-size: 11px; color: #aaa; margin-bottom: 4px; }",
+                  "  .chunk-status { font-size: 18px; }",
+                  "  .chunk-size { font-size: 10px; color: #888; margin-top: 4px; }",
+                  "  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }",
+                  "  .stat-card { background: #1a1a2e; border-radius: 8px; padding: 14px; border-left: 3px solid #a78bfa; }",
+                  "  .stat-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }",
+                  "  .stat-value { font-size: 20px; font-weight: bold; color: #fff; }",
+                  "  .stat-sub { font-size: 10px; color: #aaa; margin-top: 2px; }",
+                  "  canvas { margin-top: 10px; }",
+                  "</style>",
+                  "",
+                  "<h2>Video Stream Simulation</h2>",
+                  "<div class=\"subtitle\">Simulating progressive video chunk delivery</div>",
+                  "",
+                  "<div class=\"progress-wrap\">",
+                  "  <div class=\"progress-label\">",
+                  "    <span>Streaming Progress</span>",
+                  "    <span>{{progressPct}}% of {{totalSizeMB}} MB</span>",
+                  "  </div>",
+                  "  <div class=\"progress-bar-bg\">",
+                  "    <div class=\"progress-bar-fill\" style=\"width: {{progressPct}}%;\">{{progressPct}}%</div>",
+                  "  </div>",
+                  "</div>",
+                  "",
+                  "<div class=\"chunks-grid\" id=\"chunksGrid\"></div>",
+                  "",
+                  "<div class=\"stats-grid\">",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Current Chunk</div>",
+                  "    <div class=\"stat-value\">{{chunkName}}</div>",
+                  "    <div class=\"stat-sub\">HTTP {{statusCode}}</div>",
+                  "  </div>",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Response Time</div>",
+                  "    <div class=\"stat-value\">{{responseTime}} ms</div>",
+                  "    <div class=\"stat-sub\">Chunk delivery speed</div>",
+                  "  </div>",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Bytes Received</div>",
+                  "    <div class=\"stat-value\">{{chunkSizeKB}} KB</div>",
+                  "    <div class=\"stat-sub\">{{rangeStart}} - {{rangeEnd}}</div>",
+                  "  </div>",
+                  "</div>",
+                  "",
+                  "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script>",
+                  "<canvas id=\"timeChart\" height=\"80\"></canvas>",
+                  "",
+                  "<script>",
+                  "pm.getData(function(err, data) {",
+                  "    var allChunks = ['Chunk 1','Chunk 2','Chunk 3','Chunk 4','Chunk 5'];",
+                  "    var grid = document.getElementById('chunksGrid');",
+                  "    allChunks.forEach(function(name) {",
+                  "        var chunkData = data.chunks.find(function(c) { return c.name === name; });",
+                  "        var isDone = !!chunkData;",
+                  "        var card = document.createElement('div');",
+                  "        card.className = 'chunk-card ' + (isDone ? 'done' : 'pending');",
+                  "        card.innerHTML = '<div class=\"chunk-name\">' + name + '</div>' +",
+                  "            '<div class=\"chunk-status\">' + (isDone ? '✅' : '⏳') + '</div>' +",
+                  "            '<div class=\"chunk-size\">' + (isDone ? chunkData.time + ' ms' : '—') + '</div>';",
+                  "        grid.appendChild(card);",
+                  "    });",
+                  "",
+                  "    var ctx = document.getElementById('timeChart');",
+                  "    new Chart(ctx, {",
+                  "        type: 'bar',",
+                  "        data: {",
+                  "            labels: data.chunks.map(function(c) { return c.name; }),",
+                  "            datasets: [{",
+                  "                label: 'Response Time (ms)',",
+                  "                data: data.chunks.map(function(c) { return c.time; }),",
+                  "                backgroundColor: '#a78bfa',",
+                  "                borderRadius: 4",
+                  "            }]",
+                  "        },",
+                  "        options: {",
+                  "            legend: { labels: { fontColor: '#ccc' } },",
+                  "            title: { display: true, text: 'Chunk Response Times', fontColor: '#a78bfa' },",
+                  "            scales: {",
+                  "                xAxes: [{ ticks: { fontColor: '#aaa' }, gridLines: { color: '#2d2d44' } }],",
+                  "                yAxes: [{ ticks: { fontColor: '#aaa' }, gridLines: { color: '#2d2d44' } }]",
+                  "            }",
+                  "        }",
+                  "    });",
+                  "});",
+                  "</script>",
+                  "`;",
+                  "",
+                  "function constructVisualizerPayload() {",
+                  "    var chunks = [];",
+                  "    try { chunks = JSON.parse(pm.collectionVariables.get('sim_chunks') || '[]'); } catch(e) {}",
+                  "    return {",
+                  "        chunkName: pm.info.requestName,",
+                  "        statusCode: statusCode,",
+                  "        responseTime: responseTime,",
+                  "        chunkSizeKB: ((rangeEnd - rangeStart) / 1024).toFixed(2),",
+                  "        rangeStart: rangeStart.toLocaleString(),",
+                  "        rangeEnd: rangeEnd.toLocaleString(),",
+                  "        totalSizeMB: totalSizeMB,",
+                  "        progressPct: progressPct,",
+                  "        chunks: chunks",
+                  "    };",
+                  "}",
+                  "",
+                  "pm.visualizer.set(template, constructVisualizerPayload());"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Range",
+                "value": "bytes=1048576-2097151"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/video/stream/sample-22.mp4?token={{video_token}}&exp={{video_exp}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "video",
+                "stream",
+                "sample-22.mp4"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{video_token}}"
+                },
+                {
+                  "key": "exp",
+                  "value": "{{video_exp}}"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET \"{{baseUrl}}/video/stream/sample-22.mp4?token={{video_token}}&exp={{video_exp}}\" -H \"Range: bytes=1048576-2097151\""
+          },
+          "response": []
+        },
+        {
+          "name": "Chunk 3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Video Stream Simulation - Chunk Progress Tracker",
+                  "const statusCode = pm.response.code;",
+                  "const contentRange = pm.response.headers.get('Content-Range') || 'N/A';",
+                  "const responseTime = pm.response.responseTime;",
+                  "",
+                  "// Parse range",
+                  "let rangeStart = 0, rangeEnd = 0, totalSize = 0;",
+                  "if (contentRange !== 'N/A') {",
+                  "    const match = contentRange.match(/bytes (\\d+)-(\\d+)\\/(\\d+)/);",
+                  "    if (match) {",
+                  "        rangeStart = parseInt(match[1]);",
+                  "        rangeEnd = parseInt(match[2]);",
+                  "        totalSize = parseInt(match[3]);",
+                  "    }",
+                  "}",
+                  "",
+                  "// Track cumulative chunks in collection variable",
+                  "let chunks = [];",
+                  "try {",
+                  "    chunks = JSON.parse(pm.collectionVariables.get('sim_chunks') || '[]');",
+                  "} catch(e) { chunks = []; }",
+                  "",
+                  "const chunkName = pm.info.requestName;",
+                  "const alreadyExists = chunks.find(function(c) { return c.name === chunkName; });",
+                  "if (!alreadyExists) {",
+                  "    chunks.push({",
+                  "        name: chunkName,",
+                  "        start: rangeStart,",
+                  "        end: rangeEnd,",
+                  "        size: rangeEnd - rangeStart,",
+                  "        status: statusCode,",
+                  "        time: responseTime",
+                  "    });",
+                  "    pm.collectionVariables.set('sim_chunks', JSON.stringify(chunks));",
+                  "}",
+                  "",
+                  "// Tests",
+                  "pm.test(\"Status is 206 Partial Content\", function() {",
+                  "    pm.response.to.have.status(206);",
+                  "});",
+                  "pm.test(\"Content-Range header present\", function() {",
+                  "    pm.expect(pm.response.headers.get('Content-Range')).to.not.be.undefined;",
+                  "});",
+                  "",
+                  "// Visualizer",
+                  "const totalSizeMB = totalSize > 0 ? (totalSize / 1024 / 1024).toFixed(2) : '?';",
+                  "const progressPct = totalSize > 0 ? Math.min(((rangeEnd + 1) / totalSize) * 100, 100).toFixed(1) : 0;",
+                  "",
+                  "const template = `",
+                  "<style>",
+                  "  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; margin: 0; padding: 20px; }",
+                  "  h2 { color: #a78bfa; font-size: 18px; margin-bottom: 6px; }",
+                  "  .subtitle { color: #888; font-size: 12px; margin-bottom: 20px; }",
+                  "  .progress-wrap { background: #1a1a2e; border-radius: 10px; padding: 20px; margin-bottom: 20px; }",
+                  "  .progress-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }",
+                  "  .progress-bar-bg { background: #2d2d44; border-radius: 8px; height: 24px; overflow: hidden; }",
+                  "  .progress-bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, #a78bfa, #3b82f6); display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: bold; color: #fff; }",
+                  "  .chunks-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }",
+                  "  .chunk-card { background: #1a1a2e; border-radius: 8px; padding: 12px; text-align: center; border: 2px solid #2d2d44; }",
+                  "  .chunk-card.done { border-color: #a78bfa; }",
+                  "  .chunk-card.pending { opacity: 0.4; }",
+                  "  .chunk-name { font-size: 11px; color: #aaa; margin-bottom: 4px; }",
+                  "  .chunk-status { font-size: 18px; }",
+                  "  .chunk-size { font-size: 10px; color: #888; margin-top: 4px; }",
+                  "  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }",
+                  "  .stat-card { background: #1a1a2e; border-radius: 8px; padding: 14px; border-left: 3px solid #a78bfa; }",
+                  "  .stat-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }",
+                  "  .stat-value { font-size: 20px; font-weight: bold; color: #fff; }",
+                  "  .stat-sub { font-size: 10px; color: #aaa; margin-top: 2px; }",
+                  "  canvas { margin-top: 10px; }",
+                  "</style>",
+                  "",
+                  "<h2>Video Stream Simulation</h2>",
+                  "<div class=\"subtitle\">Simulating progressive video chunk delivery</div>",
+                  "",
+                  "<div class=\"progress-wrap\">",
+                  "  <div class=\"progress-label\">",
+                  "    <span>Streaming Progress</span>",
+                  "    <span>{{progressPct}}% of {{totalSizeMB}} MB</span>",
+                  "  </div>",
+                  "  <div class=\"progress-bar-bg\">",
+                  "    <div class=\"progress-bar-fill\" style=\"width: {{progressPct}}%;\">{{progressPct}}%</div>",
+                  "  </div>",
+                  "</div>",
+                  "",
+                  "<div class=\"chunks-grid\" id=\"chunksGrid\"></div>",
+                  "",
+                  "<div class=\"stats-grid\">",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Current Chunk</div>",
+                  "    <div class=\"stat-value\">{{chunkName}}</div>",
+                  "    <div class=\"stat-sub\">HTTP {{statusCode}}</div>",
+                  "  </div>",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Response Time</div>",
+                  "    <div class=\"stat-value\">{{responseTime}} ms</div>",
+                  "    <div class=\"stat-sub\">Chunk delivery speed</div>",
+                  "  </div>",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Bytes Received</div>",
+                  "    <div class=\"stat-value\">{{chunkSizeKB}} KB</div>",
+                  "    <div class=\"stat-sub\">{{rangeStart}} - {{rangeEnd}}</div>",
+                  "  </div>",
+                  "</div>",
+                  "",
+                  "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script>",
+                  "<canvas id=\"timeChart\" height=\"80\"></canvas>",
+                  "",
+                  "<script>",
+                  "pm.getData(function(err, data) {",
+                  "    var allChunks = ['Chunk 1','Chunk 2','Chunk 3','Chunk 4','Chunk 5'];",
+                  "    var grid = document.getElementById('chunksGrid');",
+                  "    allChunks.forEach(function(name) {",
+                  "        var chunkData = data.chunks.find(function(c) { return c.name === name; });",
+                  "        var isDone = !!chunkData;",
+                  "        var card = document.createElement('div');",
+                  "        card.className = 'chunk-card ' + (isDone ? 'done' : 'pending');",
+                  "        card.innerHTML = '<div class=\"chunk-name\">' + name + '</div>' +",
+                  "            '<div class=\"chunk-status\">' + (isDone ? '✅' : '⏳') + '</div>' +",
+                  "            '<div class=\"chunk-size\">' + (isDone ? chunkData.time + ' ms' : '—') + '</div>';",
+                  "        grid.appendChild(card);",
+                  "    });",
+                  "",
+                  "    var ctx = document.getElementById('timeChart');",
+                  "    new Chart(ctx, {",
+                  "        type: 'bar',",
+                  "        data: {",
+                  "            labels: data.chunks.map(function(c) { return c.name; }),",
+                  "            datasets: [{",
+                  "                label: 'Response Time (ms)',",
+                  "                data: data.chunks.map(function(c) { return c.time; }),",
+                  "                backgroundColor: '#a78bfa',",
+                  "                borderRadius: 4",
+                  "            }]",
+                  "        },",
+                  "        options: {",
+                  "            legend: { labels: { fontColor: '#ccc' } },",
+                  "            title: { display: true, text: 'Chunk Response Times', fontColor: '#a78bfa' },",
+                  "            scales: {",
+                  "                xAxes: [{ ticks: { fontColor: '#aaa' }, gridLines: { color: '#2d2d44' } }],",
+                  "                yAxes: [{ ticks: { fontColor: '#aaa' }, gridLines: { color: '#2d2d44' } }]",
+                  "            }",
+                  "        }",
+                  "    });",
+                  "});",
+                  "</script>",
+                  "`;",
+                  "",
+                  "function constructVisualizerPayload() {",
+                  "    var chunks = [];",
+                  "    try { chunks = JSON.parse(pm.collectionVariables.get('sim_chunks') || '[]'); } catch(e) {}",
+                  "    return {",
+                  "        chunkName: pm.info.requestName,",
+                  "        statusCode: statusCode,",
+                  "        responseTime: responseTime,",
+                  "        chunkSizeKB: ((rangeEnd - rangeStart) / 1024).toFixed(2),",
+                  "        rangeStart: rangeStart.toLocaleString(),",
+                  "        rangeEnd: rangeEnd.toLocaleString(),",
+                  "        totalSizeMB: totalSizeMB,",
+                  "        progressPct: progressPct,",
+                  "        chunks: chunks",
+                  "    };",
+                  "}",
+                  "",
+                  "pm.visualizer.set(template, constructVisualizerPayload());"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Range",
+                "value": "bytes=2097152-3145727"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/video/stream/sample-22.mp4?token={{video_token}}&exp={{video_exp}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "video",
+                "stream",
+                "sample-22.mp4"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{video_token}}"
+                },
+                {
+                  "key": "exp",
+                  "value": "{{video_exp}}"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET \"{{baseUrl}}/video/stream/sample-22.mp4?token={{video_token}}&exp={{video_exp}}\" -H \"Range: bytes=2097152-3145727\""
+          },
+          "response": []
+        },
+        {
+          "name": "Chunk 4",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Video Stream Simulation - Chunk Progress Tracker",
+                  "const statusCode = pm.response.code;",
+                  "const contentRange = pm.response.headers.get('Content-Range') || 'N/A';",
+                  "const responseTime = pm.response.responseTime;",
+                  "",
+                  "// Parse range",
+                  "let rangeStart = 0, rangeEnd = 0, totalSize = 0;",
+                  "if (contentRange !== 'N/A') {",
+                  "    const match = contentRange.match(/bytes (\\d+)-(\\d+)\\/(\\d+)/);",
+                  "    if (match) {",
+                  "        rangeStart = parseInt(match[1]);",
+                  "        rangeEnd = parseInt(match[2]);",
+                  "        totalSize = parseInt(match[3]);",
+                  "    }",
+                  "}",
+                  "",
+                  "// Track cumulative chunks in collection variable",
+                  "let chunks = [];",
+                  "try {",
+                  "    chunks = JSON.parse(pm.collectionVariables.get('sim_chunks') || '[]');",
+                  "} catch(e) { chunks = []; }",
+                  "",
+                  "const chunkName = pm.info.requestName;",
+                  "const alreadyExists = chunks.find(function(c) { return c.name === chunkName; });",
+                  "if (!alreadyExists) {",
+                  "    chunks.push({",
+                  "        name: chunkName,",
+                  "        start: rangeStart,",
+                  "        end: rangeEnd,",
+                  "        size: rangeEnd - rangeStart,",
+                  "        status: statusCode,",
+                  "        time: responseTime",
+                  "    });",
+                  "    pm.collectionVariables.set('sim_chunks', JSON.stringify(chunks));",
+                  "}",
+                  "",
+                  "// Tests",
+                  "pm.test(\"Status is 206 Partial Content\", function() {",
+                  "    pm.response.to.have.status(206);",
+                  "});",
+                  "pm.test(\"Content-Range header present\", function() {",
+                  "    pm.expect(pm.response.headers.get('Content-Range')).to.not.be.undefined;",
+                  "});",
+                  "",
+                  "// Visualizer",
+                  "const totalSizeMB = totalSize > 0 ? (totalSize / 1024 / 1024).toFixed(2) : '?';",
+                  "const progressPct = totalSize > 0 ? Math.min(((rangeEnd + 1) / totalSize) * 100, 100).toFixed(1) : 0;",
+                  "",
+                  "const template = `",
+                  "<style>",
+                  "  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; margin: 0; padding: 20px; }",
+                  "  h2 { color: #a78bfa; font-size: 18px; margin-bottom: 6px; }",
+                  "  .subtitle { color: #888; font-size: 12px; margin-bottom: 20px; }",
+                  "  .progress-wrap { background: #1a1a2e; border-radius: 10px; padding: 20px; margin-bottom: 20px; }",
+                  "  .progress-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }",
+                  "  .progress-bar-bg { background: #2d2d44; border-radius: 8px; height: 24px; overflow: hidden; }",
+                  "  .progress-bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, #a78bfa, #3b82f6); display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: bold; color: #fff; }",
+                  "  .chunks-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }",
+                  "  .chunk-card { background: #1a1a2e; border-radius: 8px; padding: 12px; text-align: center; border: 2px solid #2d2d44; }",
+                  "  .chunk-card.done { border-color: #a78bfa; }",
+                  "  .chunk-card.pending { opacity: 0.4; }",
+                  "  .chunk-name { font-size: 11px; color: #aaa; margin-bottom: 4px; }",
+                  "  .chunk-status { font-size: 18px; }",
+                  "  .chunk-size { font-size: 10px; color: #888; margin-top: 4px; }",
+                  "  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }",
+                  "  .stat-card { background: #1a1a2e; border-radius: 8px; padding: 14px; border-left: 3px solid #a78bfa; }",
+                  "  .stat-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }",
+                  "  .stat-value { font-size: 20px; font-weight: bold; color: #fff; }",
+                  "  .stat-sub { font-size: 10px; color: #aaa; margin-top: 2px; }",
+                  "  canvas { margin-top: 10px; }",
+                  "</style>",
+                  "",
+                  "<h2>Video Stream Simulation</h2>",
+                  "<div class=\"subtitle\">Simulating progressive video chunk delivery</div>",
+                  "",
+                  "<div class=\"progress-wrap\">",
+                  "  <div class=\"progress-label\">",
+                  "    <span>Streaming Progress</span>",
+                  "    <span>{{progressPct}}% of {{totalSizeMB}} MB</span>",
+                  "  </div>",
+                  "  <div class=\"progress-bar-bg\">",
+                  "    <div class=\"progress-bar-fill\" style=\"width: {{progressPct}}%;\">{{progressPct}}%</div>",
+                  "  </div>",
+                  "</div>",
+                  "",
+                  "<div class=\"chunks-grid\" id=\"chunksGrid\"></div>",
+                  "",
+                  "<div class=\"stats-grid\">",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Current Chunk</div>",
+                  "    <div class=\"stat-value\">{{chunkName}}</div>",
+                  "    <div class=\"stat-sub\">HTTP {{statusCode}}</div>",
+                  "  </div>",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Response Time</div>",
+                  "    <div class=\"stat-value\">{{responseTime}} ms</div>",
+                  "    <div class=\"stat-sub\">Chunk delivery speed</div>",
+                  "  </div>",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Bytes Received</div>",
+                  "    <div class=\"stat-value\">{{chunkSizeKB}} KB</div>",
+                  "    <div class=\"stat-sub\">{{rangeStart}} - {{rangeEnd}}</div>",
+                  "  </div>",
+                  "</div>",
+                  "",
+                  "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script>",
+                  "<canvas id=\"timeChart\" height=\"80\"></canvas>",
+                  "",
+                  "<script>",
+                  "pm.getData(function(err, data) {",
+                  "    var allChunks = ['Chunk 1','Chunk 2','Chunk 3','Chunk 4','Chunk 5'];",
+                  "    var grid = document.getElementById('chunksGrid');",
+                  "    allChunks.forEach(function(name) {",
+                  "        var chunkData = data.chunks.find(function(c) { return c.name === name; });",
+                  "        var isDone = !!chunkData;",
+                  "        var card = document.createElement('div');",
+                  "        card.className = 'chunk-card ' + (isDone ? 'done' : 'pending');",
+                  "        card.innerHTML = '<div class=\"chunk-name\">' + name + '</div>' +",
+                  "            '<div class=\"chunk-status\">' + (isDone ? '✅' : '⏳') + '</div>' +",
+                  "            '<div class=\"chunk-size\">' + (isDone ? chunkData.time + ' ms' : '—') + '</div>';",
+                  "        grid.appendChild(card);",
+                  "    });",
+                  "",
+                  "    var ctx = document.getElementById('timeChart');",
+                  "    new Chart(ctx, {",
+                  "        type: 'bar',",
+                  "        data: {",
+                  "            labels: data.chunks.map(function(c) { return c.name; }),",
+                  "            datasets: [{",
+                  "                label: 'Response Time (ms)',",
+                  "                data: data.chunks.map(function(c) { return c.time; }),",
+                  "                backgroundColor: '#a78bfa',",
+                  "                borderRadius: 4",
+                  "            }]",
+                  "        },",
+                  "        options: {",
+                  "            legend: { labels: { fontColor: '#ccc' } },",
+                  "            title: { display: true, text: 'Chunk Response Times', fontColor: '#a78bfa' },",
+                  "            scales: {",
+                  "                xAxes: [{ ticks: { fontColor: '#aaa' }, gridLines: { color: '#2d2d44' } }],",
+                  "                yAxes: [{ ticks: { fontColor: '#aaa' }, gridLines: { color: '#2d2d44' } }]",
+                  "            }",
+                  "        }",
+                  "    });",
+                  "});",
+                  "</script>",
+                  "`;",
+                  "",
+                  "function constructVisualizerPayload() {",
+                  "    var chunks = [];",
+                  "    try { chunks = JSON.parse(pm.collectionVariables.get('sim_chunks') || '[]'); } catch(e) {}",
+                  "    return {",
+                  "        chunkName: pm.info.requestName,",
+                  "        statusCode: statusCode,",
+                  "        responseTime: responseTime,",
+                  "        chunkSizeKB: ((rangeEnd - rangeStart) / 1024).toFixed(2),",
+                  "        rangeStart: rangeStart.toLocaleString(),",
+                  "        rangeEnd: rangeEnd.toLocaleString(),",
+                  "        totalSizeMB: totalSizeMB,",
+                  "        progressPct: progressPct,",
+                  "        chunks: chunks",
+                  "    };",
+                  "}",
+                  "",
+                  "pm.visualizer.set(template, constructVisualizerPayload());"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Range",
+                "value": "bytes=3145728-4194303"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/video/stream/sample-22.mp4?token={{video_token}}&exp={{video_exp}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "video",
+                "stream",
+                "sample-22.mp4"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{video_token}}"
+                },
+                {
+                  "key": "exp",
+                  "value": "{{video_exp}}"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET \"{{baseUrl}}/video/stream/sample-22.mp4?token={{video_token}}&exp={{video_exp}}\" -H \"Range: bytes=3145728-4194303\""
+          },
+          "response": []
+        },
+        {
+          "name": "Chunk 5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Video Stream Simulation - Chunk Progress Tracker",
+                  "const statusCode = pm.response.code;",
+                  "const contentRange = pm.response.headers.get('Content-Range') || 'N/A';",
+                  "const responseTime = pm.response.responseTime;",
+                  "",
+                  "// Parse range",
+                  "let rangeStart = 0, rangeEnd = 0, totalSize = 0;",
+                  "if (contentRange !== 'N/A') {",
+                  "    const match = contentRange.match(/bytes (\\d+)-(\\d+)\\/(\\d+)/);",
+                  "    if (match) {",
+                  "        rangeStart = parseInt(match[1]);",
+                  "        rangeEnd = parseInt(match[2]);",
+                  "        totalSize = parseInt(match[3]);",
+                  "    }",
+                  "}",
+                  "",
+                  "// Track cumulative chunks in collection variable",
+                  "let chunks = [];",
+                  "try {",
+                  "    chunks = JSON.parse(pm.collectionVariables.get('sim_chunks') || '[]');",
+                  "} catch(e) { chunks = []; }",
+                  "",
+                  "const chunkName = pm.info.requestName;",
+                  "const alreadyExists = chunks.find(function(c) { return c.name === chunkName; });",
+                  "if (!alreadyExists) {",
+                  "    chunks.push({",
+                  "        name: chunkName,",
+                  "        start: rangeStart,",
+                  "        end: rangeEnd,",
+                  "        size: rangeEnd - rangeStart,",
+                  "        status: statusCode,",
+                  "        time: responseTime",
+                  "    });",
+                  "    pm.collectionVariables.set('sim_chunks', JSON.stringify(chunks));",
+                  "}",
+                  "",
+                  "// Tests",
+                  "pm.test(\"Status is 206 Partial Content\", function() {",
+                  "    pm.response.to.have.status(206);",
+                  "});",
+                  "pm.test(\"Content-Range header present\", function() {",
+                  "    pm.expect(pm.response.headers.get('Content-Range')).to.not.be.undefined;",
+                  "});",
+                  "",
+                  "// Visualizer",
+                  "const totalSizeMB = totalSize > 0 ? (totalSize / 1024 / 1024).toFixed(2) : '?';",
+                  "const progressPct = totalSize > 0 ? Math.min(((rangeEnd + 1) / totalSize) * 100, 100).toFixed(1) : 0;",
+                  "",
+                  "const template = `",
+                  "<style>",
+                  "  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; margin: 0; padding: 20px; }",
+                  "  h2 { color: #a78bfa; font-size: 18px; margin-bottom: 6px; }",
+                  "  .subtitle { color: #888; font-size: 12px; margin-bottom: 20px; }",
+                  "  .progress-wrap { background: #1a1a2e; border-radius: 10px; padding: 20px; margin-bottom: 20px; }",
+                  "  .progress-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }",
+                  "  .progress-bar-bg { background: #2d2d44; border-radius: 8px; height: 24px; overflow: hidden; }",
+                  "  .progress-bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, #a78bfa, #3b82f6); display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: bold; color: #fff; }",
+                  "  .chunks-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }",
+                  "  .chunk-card { background: #1a1a2e; border-radius: 8px; padding: 12px; text-align: center; border: 2px solid #2d2d44; }",
+                  "  .chunk-card.done { border-color: #a78bfa; }",
+                  "  .chunk-card.pending { opacity: 0.4; }",
+                  "  .chunk-name { font-size: 11px; color: #aaa; margin-bottom: 4px; }",
+                  "  .chunk-status { font-size: 18px; }",
+                  "  .chunk-size { font-size: 10px; color: #888; margin-top: 4px; }",
+                  "  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }",
+                  "  .stat-card { background: #1a1a2e; border-radius: 8px; padding: 14px; border-left: 3px solid #a78bfa; }",
+                  "  .stat-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }",
+                  "  .stat-value { font-size: 20px; font-weight: bold; color: #fff; }",
+                  "  .stat-sub { font-size: 10px; color: #aaa; margin-top: 2px; }",
+                  "  canvas { margin-top: 10px; }",
+                  "</style>",
+                  "",
+                  "<h2>Video Stream Simulation</h2>",
+                  "<div class=\"subtitle\">Simulating progressive video chunk delivery</div>",
+                  "",
+                  "<div class=\"progress-wrap\">",
+                  "  <div class=\"progress-label\">",
+                  "    <span>Streaming Progress</span>",
+                  "    <span>{{progressPct}}% of {{totalSizeMB}} MB</span>",
+                  "  </div>",
+                  "  <div class=\"progress-bar-bg\">",
+                  "    <div class=\"progress-bar-fill\" style=\"width: {{progressPct}}%;\">{{progressPct}}%</div>",
+                  "  </div>",
+                  "</div>",
+                  "",
+                  "<div class=\"chunks-grid\" id=\"chunksGrid\"></div>",
+                  "",
+                  "<div class=\"stats-grid\">",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Current Chunk</div>",
+                  "    <div class=\"stat-value\">{{chunkName}}</div>",
+                  "    <div class=\"stat-sub\">HTTP {{statusCode}}</div>",
+                  "  </div>",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Response Time</div>",
+                  "    <div class=\"stat-value\">{{responseTime}} ms</div>",
+                  "    <div class=\"stat-sub\">Chunk delivery speed</div>",
+                  "  </div>",
+                  "  <div class=\"stat-card\">",
+                  "    <div class=\"stat-label\">Bytes Received</div>",
+                  "    <div class=\"stat-value\">{{chunkSizeKB}} KB</div>",
+                  "    <div class=\"stat-sub\">{{rangeStart}} - {{rangeEnd}}</div>",
+                  "  </div>",
+                  "</div>",
+                  "",
+                  "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script>",
+                  "<canvas id=\"timeChart\" height=\"80\"></canvas>",
+                  "",
+                  "<script>",
+                  "pm.getData(function(err, data) {",
+                  "    var allChunks = ['Chunk 1','Chunk 2','Chunk 3','Chunk 4','Chunk 5'];",
+                  "    var grid = document.getElementById('chunksGrid');",
+                  "    allChunks.forEach(function(name) {",
+                  "        var chunkData = data.chunks.find(function(c) { return c.name === name; });",
+                  "        var isDone = !!chunkData;",
+                  "        var card = document.createElement('div');",
+                  "        card.className = 'chunk-card ' + (isDone ? 'done' : 'pending');",
+                  "        card.innerHTML = '<div class=\"chunk-name\">' + name + '</div>' +",
+                  "            '<div class=\"chunk-status\">' + (isDone ? '✅' : '⏳') + '</div>' +",
+                  "            '<div class=\"chunk-size\">' + (isDone ? chunkData.time + ' ms' : '—') + '</div>';",
+                  "        grid.appendChild(card);",
+                  "    });",
+                  "",
+                  "    var ctx = document.getElementById('timeChart');",
+                  "    new Chart(ctx, {",
+                  "        type: 'bar',",
+                  "        data: {",
+                  "            labels: data.chunks.map(function(c) { return c.name; }),",
+                  "            datasets: [{",
+                  "                label: 'Response Time (ms)',",
+                  "                data: data.chunks.map(function(c) { return c.time; }),",
+                  "                backgroundColor: '#a78bfa',",
+                  "                borderRadius: 4",
+                  "            }]",
+                  "        },",
+                  "        options: {",
+                  "            legend: { labels: { fontColor: '#ccc' } },",
+                  "            title: { display: true, text: 'Chunk Response Times', fontColor: '#a78bfa' },",
+                  "            scales: {",
+                  "                xAxes: [{ ticks: { fontColor: '#aaa' }, gridLines: { color: '#2d2d44' } }],",
+                  "                yAxes: [{ ticks: { fontColor: '#aaa' }, gridLines: { color: '#2d2d44' } }]",
+                  "            }",
+                  "        }",
+                  "    });",
+                  "});",
+                  "</script>",
+                  "`;",
+                  "",
+                  "function constructVisualizerPayload() {",
+                  "    var chunks = [];",
+                  "    try { chunks = JSON.parse(pm.collectionVariables.get('sim_chunks') || '[]'); } catch(e) {}",
+                  "    return {",
+                  "        chunkName: pm.info.requestName,",
+                  "        statusCode: statusCode,",
+                  "        responseTime: responseTime,",
+                  "        chunkSizeKB: ((rangeEnd - rangeStart) / 1024).toFixed(2),",
+                  "        rangeStart: rangeStart.toLocaleString(),",
+                  "        rangeEnd: rangeEnd.toLocaleString(),",
+                  "        totalSizeMB: totalSizeMB,",
+                  "        progressPct: progressPct,",
+                  "        chunks: chunks",
+                  "    };",
+                  "}",
+                  "",
+                  "pm.visualizer.set(template, constructVisualizerPayload());"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Range",
+                "value": "bytes=4194304-5242879"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/video/stream/sample-22.mp4?token={{video_token}}&exp={{video_exp}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "video",
+                "stream",
+                "sample-22.mp4"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{video_token}}"
+                },
+                {
+                  "key": "exp",
+                  "value": "{{video_exp}}"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET \"{{baseUrl}}/video/stream/sample-22.mp4?token={{video_token}}&exp={{video_exp}}\" -H \"Range: bytes=4194304-5242879\""
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "video_token",
+      "value": ""
+    },
+    {
+      "key": "video_exp",
+      "value": ""
+    },
+    {
+      "key": "sim_chunks",
+      "value": ""
+    }
+  ]
 }
