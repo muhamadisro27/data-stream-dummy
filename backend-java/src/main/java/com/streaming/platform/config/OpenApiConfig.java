@@ -19,7 +19,6 @@ public class OpenApiConfig {
                         .title("Secure Video Streaming API")
                         .version("1.0")
                         .description("Endpoints for authentication, video presign, catalog, and streaming in Java 17"))
-                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(
                         new Components()
                                 .addSecuritySchemes(securitySchemeName,

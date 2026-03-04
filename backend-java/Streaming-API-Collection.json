@@ -1,0 +1,169 @@
+{
+    "info": {
+        "name": "Secure Video Streaming API (Java)",
+        "description": "Postman Collection for the Spring Boot Backend endpoints",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "1. Login (Demo)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const response = pm.response.json();",
+                                    "if (response.accessToken) {",
+                                    "    pm.collectionVariables.set(\"token\", response.accessToken);",
+                                    "    console.log(\"Token automatically saved to collection variables!\");",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Video",
+            "item": [
+                {
+                    "name": "2. List Videos",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/video/list",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "video",
+                                "list"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "3. Generate Presigned URL",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/video/presign/sample.mov",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "video",
+                                "presign",
+                                "sample.mov"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "4. Stream Video (Test via GET)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Range",
+                                "value": "bytes=0-1000000",
+                                "description": "Optional: Simulates a partial content request from a browser video player.",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/video/stream/sample.mov?token=PASTE_TOKEN_HERE&exp=PASTE_EXP_HERE",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "video",
+                                "stream",
+                                "sample.mov"
+                            ],
+                            "query": [
+                                {
+                                    "key": "token",
+                                    "value": "PASTE_TOKEN_HERE",
+                                    "description": "Get this from the Presigned URL response"
+                                },
+                                {
+                                    "key": "exp",
+                                    "value": "PASTE_EXP_HERE",
+                                    "description": "Get this from the Presigned URL response"
+                                }
+                            ]
+                        },
+                        "description": "Note: You need to manually copy the `token` and `exp` from the 'Generate Presigned URL' response and paste them into the query parameters here to test it."
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}
