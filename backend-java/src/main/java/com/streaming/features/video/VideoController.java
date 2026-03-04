@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,11 +59,10 @@ public class VideoController {
                             content = @Content(mediaType = "application/octet-stream", schema = @Schema(type = "string", format = "binary"))),
                     @ApiResponse(responseCode = "200", description = "Full video stream")
             })
-    public ResponseEntity<?> streamVideo(
+    public ResponseEntity<Resource> streamVideo(
             @Parameter(description = "Resolved stream identifier (often includes path segments)") @PathVariable("id") String id,
             @Parameter(description = "HMAC token produced by presign endpoint", required = true) @RequestParam(value = "token", required = false) String token,
-            @Parameter(description = "Expiration timestamp from presign endpoint", required = true) @RequestParam(value = "exp", required = false) String exp,
-            @RequestHeader HttpHeaders headers) throws IOException {
+            @Parameter(description = "Expiration timestamp from presign endpoint", required = true) @RequestParam(value = "exp", required = false) String exp) {
 
         // Remove leading slash that Spring Boot adds for wildcard paths depending on version
         if (id != null && id.startsWith("/")) {
@@ -84,11 +82,6 @@ public class VideoController {
 
         presignService.validateSignature(id, numericExp, token);
 
-        String range = headers.getFirst("Range");
-        if (range != null) {
-            return videoService.streamVideo(id, range);
-        } else {
-            return videoService.streamFullVideo(id);
-        }
+        return videoService.streamVideo(id);
     }
 }

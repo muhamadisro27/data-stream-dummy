@@ -23,7 +23,9 @@ import java.util.*;
 public class VideoService {
 
     private static final Logger log = LoggerFactory.getLogger(VideoService.class);
-    private final Path videoDir = Paths.get("..", "videos").toAbsolutePath().normalize();
+    
+    // The videos are located in src/main/java/com/streaming/features/videos
+    private final Path videoDir = Paths.get("src", "main", "java", "com", "streaming", "features", "videos").toAbsolutePath().normalize();
     private final Path convertedDir = videoDir.resolve("converted");
 
     private static class VideoConfig {
@@ -54,7 +56,7 @@ public class VideoService {
 
         for (File file : listFiles) {
             String name = file.getName();
-            String ext = getExtension(name).toLowerCase();
+            String ext = "." + getExtension(name).toLowerCase();
             
             if (supportedTypes.containsKey(ext)) {
                 VideoConfig config = supportedTypes.get(ext);
@@ -205,8 +207,8 @@ public class VideoService {
         return (dotIndex == -1) ? "" : filename.substring(dotIndex + 1);
     }
 
-    // Handles streaming via Spring's ResourceRegion for HTTP 206 Partial Content
-    public ResponseEntity<ResourceRegion> streamVideo(String id, String rangeHeader) throws IOException {
+    // Handles streaming via Spring's Resource mechanism, which naturally supports Range headers
+    public ResponseEntity<Resource> streamVideo(String id) {
         AssetResult asset = resolveVideoAsset(id);
         FileSystemResource videoResource = new FileSystemResource(asset.path);
 
@@ -214,35 +216,9 @@ public class VideoService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Video file not found");
         }
 
-        ResourceRegion region = resourceRegion(videoResource, rangeHeader);
-        return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+        return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(asset.mime))
                 .header(HttpHeaders.ACCEPT_RANGES, "bytes")
-                .body(region);
-    }
-
-    private ResourceRegion resourceRegion(Resource video, String httpHeaders) throws IOException {
-        long contentLength = video.contentLength();
-        if (httpHeaders != null && httpHeaders.startsWith("bytes=")) {
-            String[] ranges = httpHeaders.substring("bytes=".length()).split("-");
-            long start = Long.parseLong(ranges[0]);
-            long end = ranges.length > 1 ? Long.parseLong(ranges[1]) : contentLength - 1;
-            long rangeLength = Math.min(1024 * 1024, end - start + 1); // 1MB chunk max if not specified, though Spring handles it. We'll just return the requested range.
-            return new ResourceRegion(video, start, end - start + 1);
-        } else {
-            long rangeLength = Math.min(1024 * 1024, contentLength);
-            return new ResourceRegion(video, 0, rangeLength);
-        }
-    }
-    
-    // Fallback if full video is requested (No range header)
-    public ResponseEntity<Resource> streamFullVideo(String id) {
-        AssetResult asset = resolveVideoAsset(id);
-        FileSystemResource videoResource = new FileSystemResource(asset.path);
-        
-        return ResponseEntity.ok()
-            .contentType(MediaType.parseMediaType(asset.mime))
-            .header(HttpHeaders.ACCEPT_RANGES, "bytes")
-            .body(videoResource);
+                .body(videoResource);
     }
 }

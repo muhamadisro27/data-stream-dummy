@@ -14,7 +14,7 @@ import java.util.Map;
 @Service
 public class PresignService {
 
-    @Value("${APP_URL:http://localhost:3000}")
+    @Value("${APP_URL:http://localhost:8080}")
     private String appUrl;
 
     @Value("${PRESIGN_SECRET:mysecret}")
@@ -38,16 +38,20 @@ public class PresignService {
         );
     }
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PresignService.class);
+
     public void validateSignature(String id, long exp, String token) {
         long now = Instant.now().getEpochSecond();
         if (now > exp) {
+            log.warn("Presigned URL expired! now={}, exp={}", now, exp);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Presigned URL expired");
         }
 
         String expected = sign(id + ":" + exp);
 
         if (!java.security.MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8), token.getBytes(StandardCharsets.UTF_8))) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+            log.warn("Signature mismatch for id={}, exp={}. Expected: {}, Provided: {}", id, exp, expected, token);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid token"); // change to FORBIDDEN explicitly to match what is seen, or let it throw
         }
     }
 
